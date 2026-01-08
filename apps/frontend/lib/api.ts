@@ -11,19 +11,10 @@ import type {
   TaskListParams,
   TaskUpdateRequest,
 } from "./types";
+import { getAuthToken } from "./auth-client";
 
 // Base API URL from environment variable
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-/**
- * Get JWT token from Better Auth session.
- * This should be called before each API request.
- */
-async function getAuthToken(): Promise<string | null> {
-  // TODO: Implement Better Auth token retrieval
-  // For now, return null (will be implemented in TASK-025)
-  return null;
-}
 
 /**
  * Make an authenticated API request.
