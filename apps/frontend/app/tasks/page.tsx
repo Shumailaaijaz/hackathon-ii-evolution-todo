@@ -7,6 +7,7 @@
 "use client";
 
 import { useState } from "react";
+import { Header } from "../components/Header";
 import { TaskList } from "../components/TaskList";
 import { CreateTaskForm } from "../components/CreateTaskForm";
 import { TaskFilters } from "../components/TaskFilters";
@@ -35,7 +36,9 @@ export default function TasksPage() {
       : undefined;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <>
+      <Header />
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -61,5 +64,6 @@ export default function TasksPage() {
         order="desc"
       />
     </div>
+    </>
   );
 }
