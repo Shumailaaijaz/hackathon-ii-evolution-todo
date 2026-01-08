@@ -411,7 +411,7 @@ python scripts/init_db.py --reset  # DEV ONLY
 ## PHASE 3: BACKEND API IMPLEMENTATION (12 Tasks)
 
 ### TASK-010: Create Pydantic Settings Configuration
-**Priority**: Critical (P1) | **Time**: 25 min | **Dependencies**: TASK-009 | **Status**: [ ]
+**Priority**: Critical (P1) | **Time**: 25 min | **Dependencies**: TASK-009 | **Status**: [x]
 
 **Description:**
 Create Pydantic settings class for environment variable management with validation.
@@ -449,7 +449,7 @@ settings = Settings()
 ---
 
 ### TASK-011: Create JWT Utilities
-**Priority**: Critical (P1) | **Time**: 40 min | **Dependencies**: TASK-010 | **Status**: [ ]
+**Priority**: Critical (P1) | **Time**: 40 min | **Dependencies**: TASK-010 | **Status**: [x]
 
 **Description:**
 Implement JWT token verification utilities for Better Auth token validation.
@@ -493,7 +493,7 @@ def get_user_id_from_token(token: str) -> Optional[str]:
 ---
 
 ### TASK-012: Create FastAPI Auth Dependency
-**Priority**: Critical (P1) | **Time**: 35 min | **Dependencies**: TASK-011 | **Status**: [ ]
+**Priority**: Critical (P1) | **Time**: 35 min | **Dependencies**: TASK-011 | **Status**: [x]
 
 **Description:**
 Create FastAPI dependency to extract and validate JWT from Authorization header.
@@ -533,7 +533,7 @@ def verify_user_access(user_id: str, requested_user_id: str):
 ---
 
 ### TASK-013: Create Pydantic Response Schemas
-**Priority**: High (P1) | **Time**: 30 min | **Dependencies**: TASK-006 | **Status**: [ ]
+**Priority**: High (P1) | **Time**: 30 min | **Dependencies**: TASK-006 | **Status**: [x]
 
 **Description:**
 Create Pydantic schemas for API request/response validation.
@@ -555,7 +555,7 @@ Create Pydantic schemas for API request/response validation.
 ---
 
 ### TASK-014: Create FastAPI Application
-**Priority**: Critical (P1) | **Time**: 30 min | **Dependencies**: TASK-012, TASK-013 | **Status**: [ ]
+**Priority**: Critical (P1) | **Time**: 30 min | **Dependencies**: TASK-012, TASK-013 | **Status**: [x]
 
 **Description:**
 Initialize FastAPI app with CORS, lifespan events, and health check.
