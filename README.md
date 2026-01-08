@@ -1,42 +1,58 @@
-# Phase I Console Todo Application
+# Evolution of Todo - Phase II: Full-Stack Web Application
 
-A simple, elegant command-line todo application built with Python 3.13+. This is Phase I of the "Evolution of Todo" hackathon project, implementing core CRUD operations with an in-memory data structure.
+A production-ready, full-stack todo application with secure multi-user authentication. Built as part of the "Evolution of Todo" hackathon project, Phase II transforms the console application into a modern web platform.
 
-## Features
+## 🎯 Overview
 
-✅ **Add Tasks** - Create new todo items with descriptive titles
-✅ **View Tasks** - Display all tasks with completion status
-✅ **Mark Complete** - Toggle tasks as done
-✅ **Delete Tasks** - Remove tasks permanently
-✅ **Update Tasks** - Edit task titles
-✅ **Exit** - Gracefully close the application
+**Phase II Evolution**: Console App → Full-Stack Web Application
 
-## Architecture
+- ✅ **Multi-user authentication** with Better Auth + JWT
+- ✅ **Web UI** built with Next.js 16+ and Tailwind CSS
+- ✅ **REST API** powered by FastAPI with SQLModel ORM
+- ✅ **PostgreSQL database** on Neon serverless platform
+- ✅ **User isolation** - Each user's tasks are private and secure
+- ✅ **Production deployment** on Vercel (frontend) + Railway (backend)
 
-The application follows a clean **three-layer architecture** designed for evolutionary growth:
+## 🏗️ Architecture
+
+**Monorepo Structure**:
 
 ```
-Models (Data)
-   ↓
-Manager (Business Logic)
-   ↓
-UI (Presentation)
+apps/
+├── frontend/          Next.js 16+ (TypeScript, Tailwind CSS, Better Auth)
+└── backend/           FastAPI (Python 3.11+, SQLModel, Pydantic)
+
+Database: Neon PostgreSQL 16+ (serverless with connection pooling)
 ```
 
-### Key Design Decisions
+**Technology Stack**:
 
-- **Dictionary-based storage**: O(1) task lookup performance (see ADR-001)
-- **Auto-incrementing IDs**: Sequential integers (1, 2, 3...) never reused after deletion (see ADR-003)
-- **Exception-based error handling**: ValueError, KeyError, RuntimeError for different failure modes (see ADR-002)
-- **Type-safe**: Complete type hints with mypy strict mode compliance
-- **Test-driven**: 95%+ test coverage for Manager layer, 90%+ overall
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Frontend | Next.js | 16+ |
+| UI Library | React | 18+ |
+| Styling | Tailwind CSS | 3+ |
+| Auth | Better Auth | Latest |
+| Data Fetching | SWR | Latest |
+| Icons | Lucide React | Latest |
+| Backend | FastAPI | 0.104+ |
+| ORM | SQLModel | Latest |
+| Validation | Pydantic | 2.0+ |
+| Database | PostgreSQL (Neon) | 16+ |
+| Migrations | Alembic | Latest |
+| Testing (FE) | Jest + Playwright | Latest |
+| Testing (BE) | pytest | Latest |
 
-## Requirements
+## 🚀 Quick Start
 
-- **Python**: 3.13 or higher
-- **Dependencies**: Listed in `requirements.txt`
+### Prerequisites
 
-## Installation
+- **Node.js** 18+ and npm 9+
+- **Python** 3.11+
+- **PostgreSQL** database (Neon account recommended)
+- **Git** for version control
+
+### Installation
 
 1. **Clone the repository**:
    ```bash
@@ -44,236 +60,218 @@ UI (Presentation)
    cd hackathon-ii-evolution-todo
    ```
 
-2. **Create virtual environment**:
+2. **Install root dependencies** (optional - for running both services):
    ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   npm install
    ```
 
-3. **Install dependencies**:
+3. **Setup Backend**:
    ```bash
+   cd apps/backend
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
-## Usage
+4. **Setup Frontend**:
+   ```bash
+   cd apps/frontend
+   npm install
+   ```
 
-### Running the Application
+### Environment Configuration
+
+1. **Backend** - Create `apps/backend/.env`:
+   ```env
+   DATABASE_URL=postgresql://user:password@host.neon.tech/dbname?sslmode=require
+   BETTER_AUTH_SECRET=your-secret-key-min-32-characters
+   JWT_ALGORITHM=HS256
+   JWT_EXPIRE_DAYS=7
+   CORS_ORIGINS=http://localhost:3000
+   ENVIRONMENT=development
+   DEBUG=True
+   ```
+
+2. **Frontend** - Create `apps/frontend/.env.local`:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   BETTER_AUTH_SECRET=your-secret-key-min-32-characters
+   NODE_ENV=development
+   ```
+
+   **⚠️ IMPORTANT**: `BETTER_AUTH_SECRET` must be identical in both .env files!
+
+### Database Setup
 
 ```bash
-python main.py
+cd apps/backend
+alembic upgrade head  # Run database migrations
 ```
 
-### Menu Options
+### Running Locally
 
-```
-=== Todo Menu ===
-1. Add a new task
-2. View all tasks
-3. Mark task as complete
-4. Delete a task
-5. Update a task
-6. Exit
+**Option 1: Run both services together** (from root):
+```bash
+npm run dev
 ```
 
-### Example Session
+**Option 2: Run services separately**:
 
-```
-$ python main.py
-Welcome to the Todo Application!
+```bash
+# Terminal 1: Backend (http://localhost:8000)
+cd apps/backend
+uvicorn app.main:app --reload
 
-=== Todo Menu ===
-1. Add a new task
-2. View all tasks
-3. Mark task as complete
-4. Delete a task
-5. Update a task
-6. Exit
-
-Enter your choice: 1
-Enter task title: Buy groceries
-Task added successfully: 1. Buy groceries
-
-Enter your choice: 2
-1. [ ] Buy groceries
-
-Enter your choice: 3
-Enter task ID to mark complete: 1
-Task 1 marked as complete.
-
-Enter your choice: 2
-1. [X] Buy groceries
-
-Enter your choice: 6
-Goodbye!
+# Terminal 2: Frontend (http://localhost:3000)
+cd apps/frontend
+npm run dev
 ```
 
-## Project Structure
+### Verification
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs (Swagger UI)
+- **Health Check**: http://localhost:8000/health
+
+## 📚 Documentation
+
+- **Project Structure**: See [CLAUDE.md](./CLAUDE.md)
+- **Specifications**: See [specs/](./specs/)
+- **Phase I Reference**: See [Phase I README](./specs/phase-1-todo-app/)
+
+## 🧪 Testing
+
+### Backend Tests
+
+```bash
+cd apps/backend
+pytest                      # Run all tests
+pytest --cov=app           # With coverage
+pytest tests/test_tasks.py # Specific test file
+```
+
+**Test Coverage Target**: ≥90%
+
+### Frontend Tests
+
+```bash
+cd apps/frontend
+npm test                   # Unit tests (Jest)
+npm run test:e2e          # E2E tests (Playwright)
+```
+
+**Test Coverage Target**: ≥80%
+
+## 🚢 Deployment
+
+### Backend (Railway/Render)
+
+1. Connect GitHub repository
+2. Set environment variables (DATABASE_URL, BETTER_AUTH_SECRET, etc.)
+3. Deploy from `apps/backend`
+4. Run migrations: `alembic upgrade head`
+
+### Frontend (Vercel)
+
+1. Connect GitHub repository
+2. Set root directory to `apps/frontend`
+3. Set environment variables (NEXT_PUBLIC_API_URL, BETTER_AUTH_SECRET)
+4. Deploy
+
+### Database (Neon)
+
+1. Create project at https://neon.tech
+2. Copy connection string
+3. Add to backend environment variables
+4. Run migrations
+
+## 🔐 Security Features
+
+- ✅ **JWT Authentication** with 7-day token expiration
+- ✅ **Password Hashing** with bcrypt (10+ rounds)
+- ✅ **User Isolation** - 100% enforcement (no cross-user access)
+- ✅ **HTTPS Only** in production
+- ✅ **CORS** restricted to allowed origins
+- ✅ **Input Validation** on both frontend and backend
+- ✅ **SQL Injection Protection** via parameterized queries
+
+## 📊 Performance Targets
+
+- API Response Time: < 200ms (p95)
+- Database Queries: < 50ms
+- JWT Validation: < 10ms
+- Frontend Page Load: < 2s on 3G
+- Concurrent Users: 100+
+
+## 🔄 Development Workflow
+
+This project follows **Spec-Driven Development (SDD)** with **Test-Driven Development (TDD)**:
+
+1. **Spec** → Define requirements
+2. **Plan** → Design architecture
+3. **Tasks** → Break down implementation
+4. **Red** → Write failing tests
+5. **Green** → Minimal implementation
+6. **Refactor** → Improve code quality
+
+## 📁 Project Structure
 
 ```
 hackathon-ii-evolution-todo/
-├── main.py                      # Application entry point
-├── requirements.txt             # Python dependencies
-├── pytest.ini                   # Test configuration
-├── mypy.ini                     # Type checking config
-├── .flake8                      # PEP 8 config
-├── .gitignore                   # Git ignore rules
-├── README.md                    # This file
-├── specs/                       # Feature specifications
-│   ├── phase-1-todo-app/
-│   │   ├── spec.md              # Requirements
-│   │   ├── plan.md              # Architecture
-│   │   └── tasks.md             # Task breakdown
-│   └── hackathon-ii-reference.md
-├── history/                     # Project history
-│   └── adr/                     # Architecture Decision Records
-│       ├── ADR-001-dictionary-storage.md
-│       ├── ADR-002-exception-handling.md
-│       ├── ADR-003-integer-ids.md
-│       └── ADR-004-three-layer-architecture.md
-└── todo_app/                    # Main application package
-    ├── __init__.py
-    ├── models/                  # Data models
-    │   ├── __init__.py
-    │   └── task.py              # Task dataclass
-    ├── manager/                 # Business logic
-    │   ├── __init__.py
-    │   └── task_manager.py      # CRUD operations
-    ├── ui/                      # User interface
-    │   ├── __init__.py
-    │   └── menu_ui.py           # CLI menu system
-    └── tests/                   # Test suite
-        ├── __init__.py
-        ├── test_task.py         # Model tests (11 tests)
-        ├── test_task_manager.py # Manager tests (30 tests)
-        ├── test_menu_ui.py      # UI tests (30 tests)
-        └── test_integration.py  # Integration tests (10 tests)
+├── apps/
+│   ├── frontend/            # Next.js application
+│   │   ├── app/            # App Router pages
+│   │   ├── components/     # React components
+│   │   ├── lib/           # Utilities and API client
+│   │   └── tests/         # Frontend tests
+│   └── backend/            # FastAPI application
+│       ├── app/
+│       │   ├── models/    # SQLModel data models
+│       │   ├── api/       # API routes
+│       │   ├── core/      # Config and security
+│       │   └── schemas/   # Pydantic schemas
+│       ├── alembic/       # Database migrations
+│       └── tests/         # Backend tests
+├── specs/                  # Feature specifications
+├── history/               # ADRs and prompt history
+├── .claude/              # AI agent configurations
+├── .specify/            # SpecKit Plus configuration
+└── package.json         # Workspace configuration
 ```
 
-## Development
+## 🛠️ Development Commands
 
-### Running Tests
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Run both frontend and backend |
+| `npm run dev:frontend` | Run only frontend |
+| `npm run dev:backend` | Run only backend |
+| `npm test` | Run all tests |
+| `npm run test:frontend` | Run frontend tests |
+| `npm run test:backend` | Run backend tests |
+| `npm run build:frontend` | Build frontend for production |
+| `npm run lint` | Lint all code |
 
-```bash
-# Run all tests
-pytest
+## 🎓 Learning Resources
 
-# Run with coverage
-pytest --cov=todo_app --cov-report=html
+- **Next.js**: https://nextjs.org/docs
+- **Better Auth**: https://better-auth.com/docs
+- **FastAPI**: https://fastapi.tiangolo.com
+- **SQLModel**: https://sqlmodel.tiangolo.com
+- **Neon PostgreSQL**: https://neon.tech/docs
+- **Tailwind CSS**: https://tailwindcss.com/docs
 
-# Run specific test file
-pytest todo_app/tests/test_task_manager.py
+## 📝 License
 
-# Run with verbose output
-pytest -v
-```
+MIT
 
-### Code Quality Checks
+## 🙏 Acknowledgments
 
-```bash
-# Type checking (mypy)
-mypy todo_app
-
-# PEP 8 compliance (flake8)
-flake8 todo_app
-
-# Code formatting (black)
-black todo_app --check
-```
-
-## Testing Coverage
-
-The project maintains high test coverage:
-
-- **Manager Layer**: 95%+ coverage (all CRUD operations thoroughly tested)
-- **Models Layer**: 100% coverage (all validation paths tested)
-- **UI Layer**: 90%+ coverage (all workflows and error cases tested)
-- **Overall**: 90%+ coverage
-
-### Test Statistics
-
-- **Total Tests**: 81+ comprehensive tests
-- **Test Types**: Unit, Integration, Workflow
-- **Testing Style**: Given-When-Then (BDD-style)
-
-## Error Handling
-
-The application handles all error cases gracefully:
-
-- **Empty titles**: Rejected with clear error messages
-- **Whitespace-only titles**: Rejected with validation errors
-- **Nonexistent task IDs**: KeyError caught and displayed
-- **Already completed tasks**: RuntimeError with helpful message
-- **Invalid ID format**: ValueError handled for non-numeric input
-- **Invalid menu choices**: User prompted to enter valid option
-
-## Acceptance Criteria
-
-### Phase I Requirements (All Met ✅)
-
-- ✅ User can add a new task with a title
-- ✅ User can view all tasks (with ID and completion status)
-- ✅ User can mark a task as complete
-- ✅ User can delete a task
-- ✅ User can update a task title
-- ✅ User can exit the application
-- ✅ Invalid input is handled gracefully
-- ✅ No persistence (in-memory only)
-- ✅ No external dependencies beyond testing tools
-
-### Non-Functional Requirements (All Met ✅)
-
-- ✅ **Performance**: < 100ms response time for 10,000 tasks
-- ✅ **Code Quality**: PEP 8 compliant, type-safe, well-documented
-- ✅ **Test Coverage**: 95%+ for Manager, 90%+ overall
-- ✅ **Architecture**: Clean separation of concerns (Models-Manager-UI)
-- ✅ **Maintainability**: Clear code, comprehensive docstrings, ADRs
-
-## Design Principles
-
-1. **Spec-Driven Development**: All code generated from specifications
-2. **Test-First Development**: TDD with RED-GREEN-REFACTOR cycle
-3. **Clean Code**: PEP 8 compliance, comprehensive docstrings
-4. **Single Responsibility**: Each class/method has one clear purpose
-5. **Evolutionary Architecture**: Designed for Phase II database migration
-6. **User Experience First**: Clear prompts, helpful error messages
-
-## Future Evolution
-
-This Phase I implementation is designed for seamless evolution:
-
-- **Phase II**: Add database persistence (PostgreSQL), web API (FastAPI), React frontend
-- **Phase III**: AI chatbot integration
-- **Phase IV**: Containerization with Kubernetes
-- **Phase V**: Cloud-native deployment with event-driven architecture
-
-The three-layer architecture enables database migration without refactoring UI or Models layers (see ADR-004).
-
-## Technical Specifications
-
-- **Python Version**: 3.13+
-- **Type Hints**: Complete coverage with mypy strict mode
-- **Testing**: pytest with pytest-cov
-- **Code Style**: PEP 8 (enforced by flake8)
-- **Formatting**: Black-compatible (88 char line length)
-
-## Documentation
-
-- **Specification**: `specs/phase-1-todo-app/spec.md`
-- **Architecture Plan**: `specs/phase-1-todo-app/plan.md`
-- **Task Breakdown**: `specs/phase-1-todo-app/tasks.md`
-- **ADRs**: `history/adr/ADR-*.md`
-- **Constitution**: `.specify/memory/constitution.md`
-
-## License
-
-This is a hackathon project for educational purposes.
-
-## Author
-
-Built with Spec-Driven Development using Claude Code.
+Built as part of the "Evolution of Todo" hackathon project using Spec-Driven Development with AI-assisted coding (Claude Code).
 
 ---
 
-**Status**: Phase I Complete ✅
-**Next Phase**: Phase II - Full-Stack Web Application
-"# hackathon-ii-evolution-todo" 
+**Phase**: II - Full-Stack Web Application
+**Status**: In Development
+**Next Phase**: III - Mobile + Real-time Features
