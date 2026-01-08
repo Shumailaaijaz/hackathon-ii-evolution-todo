@@ -333,7 +333,7 @@ def get_session():
 ---
 
 ### TASK-008: Create Alembic Migration Configuration
-**Priority**: High (P1) | **Time**: 30 min | **Dependencies**: TASK-007 | **Status**: [ ]
+**Priority**: High (P1) | **Time**: 30 min | **Dependencies**: TASK-007 | **Status**: [x]
 
 **Description:**
 Initialize Alembic for migrations and create initial migration with tables, indexes, and updated_at trigger.
@@ -383,7 +383,7 @@ psql $DATABASE_URL -c "\dt"
 ---
 
 ### TASK-009: Create Database Initialization Script
-**Priority**: Medium (P1) | **Time**: 20 min | **Dependencies**: TASK-008 | **Status**: [ ]
+**Priority**: Medium (P1) | **Time**: 20 min | **Dependencies**: TASK-008 | **Status**: [x]
 
 **Description:**
 Create Python script to initialize database, verify connection, and provide dev utilities.
