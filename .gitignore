@@ -14,7 +14,13 @@ dist/
 downloads/
 eggs/
 .eggs/
+
+# Python packaging directories
 lib/
+
+# Exception: allow frontend lib directory (Next.js source code) - MUST come AFTER lib/ ignore
+!apps/frontend/lib/
+!apps/frontend/lib/**
 lib64/
 parts/
 sdist/

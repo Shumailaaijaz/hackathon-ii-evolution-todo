@@ -1,210 +1,632 @@
-# Claude Code Rules
+# Evolution of Todo - Phase II: Full-Stack Web Application
 
-This file is generated during init for the selected agent.
+> **Spec-Driven Development with AI-Assisted Coding**
+> Building a production-ready todo application using Next.js + FastAPI + PostgreSQL
 
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+---
 
-## Task context
+## 🎯 Project Overview
 
-**Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.
+This is **Phase II** of the "Evolution of Todo" hackathon project. We're transforming the Phase I console application into a full-stack web system with:
 
-**Your Success is Measured By:**
-- All outputs strictly follow the user intent.
-- Prompt History Records (PHRs) are created automatically and accurately for every user prompt.
-- Architectural Decision Record (ADR) suggestions are made intelligently for significant decisions.
-- All changes are small, testable, and reference code precisely.
+- **Frontend**: Next.js 14+ (React, TypeScript, Tailwind CSS)
+- **Backend**: FastAPI (Python 3.11+, SQLModel, Pydantic)
+- **Database**: PostgreSQL (Neon serverless)
+- **Deployment**: Vercel (frontend) + Railway (backend)
+- **Architecture**: Monorepo with workspace management
 
-## Core Guarantees (Product Promise)
+### Phase I → Phase II Evolution
+Phase II **builds upon** Phase I foundations by:
+1. ✅ Adding web UI (Next.js with React)
+2. ✅ Exposing REST API (FastAPI)
+3. ✅ Adding persistence (PostgreSQL)
+4. ✅ Containerizing services (Docker Compose)
+5. ✅ Deploying to production (Vercel + Railway)
 
-- Record every user input verbatim in a Prompt History Record (PHR) after every user message. Do not truncate; preserve full multiline input.
-- PHR routing (all under `history/prompts/`):
-  - Constitution → `history/prompts/constitution/`
-  - Feature-specific → `history/prompts/<feature-name>/`
-  - General → `history/prompts/general/`
-- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto‑create ADRs; require user consent.
+**Core business logic from Phase I is preserved and extended**, not rewritten.
 
-## Development Guidelines
+---
 
-### 1. Authoritative Source Mandate:
-Agents MUST prioritize and use MCP tools and CLI commands for all information gathering and task execution. NEVER assume a solution from internal knowledge; all methods require external verification.
+## 📁 Monorepo Structure
 
-### 2. Execution Flow:
-Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions (running commands and capturing outputs) over manual file creation or reliance on internal knowledge.
+```
+hackathon-ii-evolution-todo/
+├── .claude/                        # AI Agent Configurations
+│   ├── agents/                     # Specialized agents
+│   │   ├── nextjs-frontend-developer.md
+│   │   ├── fastapi-backend-developer.md
+│   │   ├── database-architect.md
+│   │   ├── auth-security-guardian.md
+│   │   └── integration-testing-agent.md
+│   ├── commands/                   # SpecKit Plus commands
+│   │   ├── sp.specify.md          # Create specifications
+│   │   ├── sp.plan.md             # Generate architecture plans
+│   │   ├── sp.tasks.md            # Break down into tasks
+│   │   └── sp.adr.md              # Document decisions
+│   └── skills/
+│       └── skills.md              # Phase II implementation skills
+│
+├── .specify/                       # SpecKit Plus Configuration
+│   ├── memory/
+│   │   └── constitution.md        # Project principles & standards
+│   ├── templates/                 # Spec/Plan/Task templates
+│   └── scripts/                   # Automation scripts
+│
+├── specs/                          # Feature Specifications
+│   ├── phase-1-todo-app/          # Phase I specs (reference)
+│   │   ├── spec.md
+│   │   ├── plan.md
+│   │   └── tasks.md
+│   └── phase-2-todo-web/          # Phase II specs (active)
+│       ├── README.md              # Spec structure guide
+│       ├── spec.md                # Main feature spec
+│       ├── plan.md                # Architecture plan
+│       ├── tasks.md               # Task breakdown
+│       ├── features/              # Feature-specific specs
+│       ├── api/                   # API endpoint specs
+│       ├── database/              # Schema & migration specs
+│       └── ui/                    # Component & UX specs
+│
+├── history/                        # Project History
+│   ├── prompts/                   # Prompt History Records (PHRs)
+│   │   ├── constitution/
+│   │   ├── phase-1-todo-app/
+│   │   ├── phase-2-todo-web/
+│   │   └── general/
+│   └── adr/                       # Architecture Decision Records
+│       ├── 001-dictionary-task-storage.md
+│       ├── 002-exception-based-error-handling.md
+│       ├── 003-integer-id-generation.md
+│       └── 004-three-layer-architecture.md
+│
+├── apps/                           # Application Services
+│   ├── frontend/                  # Next.js Application
+│   │   ├── app/                   # Next.js App Router
+│   │   │   ├── api/              # Backend-for-Frontend (BFF)
+│   │   │   ├── components/       # React components
+│   │   │   ├── hooks/            # Custom React hooks
+│   │   │   ├── types/            # TypeScript types
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   ├── tests/
+│   │   │   └── e2e/              # Playwright E2E tests
+│   │   ├── .env.example
+│   │   ├── .env.local
+│   │   ├── CLAUDE.md             # Frontend-specific guidelines
+│   │   ├── package.json
+│   │   ├── next.config.js
+│   │   ├── tsconfig.json
+│   │   └── tailwind.config.ts
+│   │
+│   └── backend/                   # FastAPI Application
+│       ├── app/
+│       │   ├── api/
+│       │   │   └── routes/       # API endpoints
+│       │   ├── core/             # Config, DB, security
+│       │   ├── models/           # SQLModel schemas
+│       │   ├── services/         # Business logic
+│       │   ├── schemas/          # Pydantic schemas
+│       │   └── main.py
+│       ├── alembic/              # Database migrations
+│       ├── tests/
+│       │   ├── unit/
+│       │   └── integration/
+│       ├── .env.example
+│       ├── .env
+│       ├── CLAUDE.md             # Backend-specific guidelines
+│       ├── pyproject.toml
+│       └── alembic.ini
+│
+├── packages/                       # Shared Packages (optional)
+│   └── shared-types/
+│       ├── src/
+│       └── package.json
+│
+├── docker-compose.yml             # Local development services
+├── vercel.json                    # Frontend deployment config
+├── railway.json                   # Backend deployment config
+├── package.json                   # Workspace root
+├── CLAUDE.md                      # This file
+└── README.md                      # User-facing documentation
+```
 
-### 3. Knowledge capture (PHR) for Every User Input.
-After completing requests, you **MUST** create a PHR (Prompt History Record).
+---
 
-**When to create PHRs:**
-- Implementation work (code changes, new features)
-- Planning/architecture discussions
-- Debugging sessions
-- Spec/task/plan creation
-- Multi-step workflows
+## 📖 How to Reference Specifications
 
-**PHR Creation Process:**
+### SpecKit Plus Structure
 
-1) Detect stage
-   - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
+This project uses **SpecKit Plus** for Spec-Driven Development. All features follow this workflow:
 
-2) Generate title
-   - 3–7 words; create a slug for the filename.
+1. **Specification** (`specs/<feature>/spec.md`) - Requirements & acceptance criteria
+2. **Architecture Plan** (`specs/<feature>/plan.md`) - Technical design & decisions
+3. **Task Breakdown** (`specs/<feature>/tasks.md`) - Implementable tasks with test cases
+4. **Prompt History** (`history/prompts/<feature>/`) - Development conversation records
+5. **ADRs** (`history/adr/`) - Architectural decision records
 
-2a) Resolve route (all under history/prompts/)
-  - `constitution` → `history/prompts/constitution/`
-  - Feature stages (spec, plan, tasks, red, green, refactor, explainer, misc) → `history/prompts/<feature-name>/` (requires feature context)
-  - `general` → `history/prompts/general/`
+### Referencing Specs in Code
 
-3) Prefer agent‑native flow (no shell)
-   - Read the PHR template from one of:
-     - `.specify/templates/phr-template.prompt.md`
-     - `templates/phr-template.prompt.md`
-   - Allocate an ID (increment; on collision, increment again).
-   - Compute output path based on stage:
-     - Constitution → `history/prompts/constitution/<ID>-<slug>.constitution.prompt.md`
-     - Feature → `history/prompts/<feature-name>/<ID>-<slug>.<stage>.prompt.md`
-     - General → `history/prompts/general/<ID>-<slug>.general.prompt.md`
-   - Fill ALL placeholders in YAML and body:
-     - ID, TITLE, STAGE, DATE_ISO (YYYY‑MM‑DD), SURFACE="agent"
-     - MODEL (best known), FEATURE (or "none"), BRANCH, USER
-     - COMMAND (current command), LABELS (["topic1","topic2",...])
-     - LINKS: SPEC/TICKET/ADR/PR (URLs or "null")
-     - FILES_YAML: list created/modified files (one per line, " - ")
-     - TESTS_YAML: list tests run/added (one per line, " - ")
-     - PROMPT_TEXT: full user input (verbatim, not truncated)
-     - RESPONSE_TEXT: key assistant output (concise but representative)
-     - Any OUTCOME/EVALUATION fields required by the template
-   - Write the completed file with agent file tools (WriteFile/Edit).
-   - Confirm absolute path in output.
+When implementing features, **always reference the spec**:
 
-4) Use sp.phr command file if present
-   - If `.**/commands/sp.phr.*` exists, follow its structure.
-   - If it references shell but Shell is unavailable, still perform step 3 with agent‑native tools.
+```typescript
+// ✅ GOOD: Clear spec reference
+// Implementation follows spec.md section 3.2: Task Creation Validation
+export function validateTaskTitle(title: string): boolean {
+  // Spec requirement: Title must be 1-200 characters
+  return title.trim().length >= 1 && title.length <= 200;
+}
+```
 
-5) Shell fallback (only if step 3 is unavailable or fails, and Shell is permitted)
-   - Run: `.specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json`
-   - Then open/patch the created file to ensure all placeholders are filled and prompt/response are embedded.
+```python
+# ✅ GOOD: Clear spec reference
+# Implements plan.md Section 4.1: REST API Design
+@router.post("/api/tasks", response_model=TaskResponse, status_code=201)
+async def create_task(task: TaskCreate):
+    """
+    Create new task.
 
-6) Routing (automatic, all under history/prompts/)
-   - Constitution → `history/prompts/constitution/`
-   - Feature stages → `history/prompts/<feature-name>/` (auto-detected from branch or explicit feature context)
-   - General → `history/prompts/general/`
+    Spec: specs/phase-2-todo-web/api/tasks-api.md
+    Plan: specs/phase-2-todo-web/plan.md (Section 4.1)
+    """
+```
 
-7) Post‑creation validations (must pass)
-   - No unresolved placeholders (e.g., `{{THIS}}`, `[THAT]`).
-   - Title, stage, and dates match front‑matter.
-   - PROMPT_TEXT is complete (not truncated).
-   - File exists at the expected path and is readable.
-   - Path matches route.
+### Finding Relevant Specs
 
-8) Report
-   - Print: ID, path, stage, title.
-   - On any failure: warn but do not block the main command.
-   - Skip PHR only for `/sp.phr` itself.
+```bash
+# List all Phase II specs
+ls specs/phase-2-todo-web/
 
-### 4. Explicit ADR suggestions
-- When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
+# View main specification
+cat specs/phase-2-todo-web/spec.md
 
-### 5. Human as Tool Strategy
-You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
+# Check API endpoint specs
+cat specs/phase-2-todo-web/api/tasks-api.md
 
-**Invocation Triggers:**
-1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
-2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
-3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
+# Review database schema
+cat specs/phase-2-todo-web/database/tasks-schema.md
 
-## Default policies (must follow)
-- Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
-- Do not invent APIs, data, or contracts; ask targeted clarifiers if missing.
-- Never hardcode secrets or tokens; use `.env` and docs.
-- Prefer the smallest viable diff; do not refactor unrelated code.
-- Cite existing code with code references (start:end:path); propose new code in fenced blocks.
-- Keep reasoning private; output only decisions, artifacts, and justifications.
+# Check UI components
+cat specs/phase-2-todo-web/ui/task-list-page.md
+```
 
-### Execution contract for every request
-1) Confirm surface and success criteria (one sentence).
-2) List constraints, invariants, non‑goals.
-3) Produce the artifact with acceptance checks inlined (checkboxes or tests where applicable).
-4) Add follow‑ups and risks (max 3 bullets).
-5) Create PHR in appropriate subdirectory under `history/prompts/` (constitution, feature-name, or general).
-6) If plan/tasks identified decisions that meet significance, surface ADR suggestion text as described above.
+---
 
-### Minimum acceptance criteria
-- Clear, testable acceptance criteria included
-- Explicit error paths and constraints stated
-- Smallest viable change; no unrelated edits
-- Code references to modified/inspected files where relevant
+## 🔄 Development Workflow
 
-## Architect Guidelines (for planning)
+### Step 1: Create Specification
 
-Instructions: As an expert architect, generate a detailed architectural plan for [Project Name]. Address each of the following thoroughly.
+Navigate to the feature directory and run:
 
-1. Scope and Dependencies:
-   - In Scope: boundaries and key features.
-   - Out of Scope: explicitly excluded items.
-   - External Dependencies: systems/services/teams and ownership.
+```bash
+cd specs/phase-2-todo-web
+/sp.specify
+```
 
-2. Key Decisions and Rationale:
-   - Options Considered, Trade-offs, Rationale.
-   - Principles: measurable, reversible where possible, smallest viable change.
+This launches the **spec-generator agent** to create `spec.md` with:
+- User stories
+- Acceptance criteria
+- Validation rules
+- Business logic
+- Edge cases
 
-3. Interfaces and API Contracts:
-   - Public APIs: Inputs, Outputs, Errors.
-   - Versioning Strategy.
-   - Idempotency, Timeouts, Retries.
-   - Error Taxonomy with status codes.
+### Step 2: Generate Architecture Plan
 
-4. Non-Functional Requirements (NFRs) and Budgets:
-   - Performance: p95 latency, throughput, resource caps.
-   - Reliability: SLOs, error budgets, degradation strategy.
-   - Security: AuthN/AuthZ, data handling, secrets, auditing.
-   - Cost: unit economics.
+```bash
+/sp.plan
+```
 
-5. Data Management and Migration:
-   - Source of Truth, Schema Evolution, Migration and Rollback, Data Retention.
+This launches the **spec-to-architecture agent** to create `plan.md` with:
+- Technical design
+- Component architecture
+- API contracts
+- Database schema
+- Performance targets
 
-6. Operational Readiness:
-   - Observability: logs, metrics, traces.
-   - Alerting: thresholds and on-call owners.
-   - Runbooks for common tasks.
-   - Deployment and Rollback strategies.
-   - Feature Flags and compatibility.
+### Step 3: Break Down Into Tasks
 
-7. Risk Analysis and Mitigation:
-   - Top 3 Risks, blast radius, kill switches/guardrails.
+```bash
+/sp.tasks
+```
 
-8. Evaluation and Validation:
-   - Definition of Done (tests, scans).
-   - Output Validation for format/requirements/safety.
+This launches the **task-breakdown-organizer agent** to create `tasks.md` with:
+- Atomic, testable tasks
+- Dependencies
+- Acceptance criteria
+- Test cases
 
-9. Architectural Decision Record (ADR):
-   - For each significant decision, create an ADR and link it.
+### Step 4: Implement Tasks
 
-### Architecture Decision Records (ADR) - Intelligent Suggestion
+For **frontend tasks**:
+```bash
+# Uses nextjs-frontend-developer agent
+<implement frontend components, hooks, pages>
+```
 
-After design/architecture work, test for ADR significance:
+For **backend tasks**:
+```bash
+# Uses fastapi-backend-developer agent
+<implement API endpoints, models, services>
+```
 
-- Impact: long-term consequences? (e.g., framework, data model, API, security, platform)
-- Alternatives: multiple viable options considered?
-- Scope: cross‑cutting and influences system design?
+For **database tasks**:
+```bash
+# Uses database-architect agent
+<create schemas, migrations, indexes>
+```
 
-If ALL true, suggest:
-📋 Architectural decision detected: [brief-description]
-   Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
+### Step 5: Test Integration
 
-Wait for consent; never auto-create ADRs. Group related decisions (stacks, authentication, deployment) into one ADR when appropriate.
+```bash
+# Uses integration-testing-agent
+<run E2E tests, API tests, integration tests>
+```
 
-## Basic Project Structure
+### Step 6: Document Decisions
 
-- `.specify/memory/constitution.md` — Project principles
-- `specs/<feature>/spec.md` — Feature requirements
-- `specs/<feature>/plan.md` — Architecture decisions
-- `specs/<feature>/tasks.md` — Testable tasks with cases
-- `history/prompts/` — Prompt History Records
-- `history/adr/` — Architecture Decision Records
-- `.specify/` — SpecKit Plus templates and scripts
+When making significant architectural decisions:
 
-## Code Standards
-See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+```bash
+/sp.adr <decision-title>
+```
+
+This creates an ADR in `history/adr/` documenting:
+- Context
+- Options considered
+- Decision made
+- Rationale
+- Consequences
+
+---
+
+## 💻 Development Commands
+
+### Frontend (Next.js)
+
+```bash
+# Navigate to frontend
+cd apps/frontend
+
+# Install dependencies
+npm install
+
+# Development server (http://localhost:3000)
+npm run dev
+
+# Build for production
+npm run build
+
+# Run tests
+npm run test
+
+# E2E tests (Playwright)
+npm run test:e2e
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+```
+
+### Backend (FastAPI)
+
+```bash
+# Navigate to backend
+cd apps/backend
+
+# Install dependencies
+poetry install
+
+# Development server (http://localhost:8000)
+poetry run uvicorn app.main:app --reload
+
+# API documentation (auto-generated)
+# http://localhost:8000/docs (Swagger)
+# http://localhost:8000/redoc (ReDoc)
+
+# Run tests
+poetry run pytest
+
+# Run tests with coverage
+poetry run pytest --cov=app --cov-report=html
+
+# Type checking
+poetry run mypy app
+
+# Database migrations
+poetry run alembic revision --autogenerate -m "Description"
+poetry run alembic upgrade head
+```
+
+### Full Stack (Docker Compose)
+
+```bash
+# Start all services (Postgres + Backend + Frontend)
+docker-compose up
+
+# Start in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Rebuild containers
+docker-compose up --build
+```
+
+### Workspace Commands (Root)
+
+```bash
+# Install all dependencies (frontend + backend)
+npm install
+
+# Run frontend dev server
+npm run dev:frontend
+
+# Run backend dev server
+npm run dev:backend
+
+# Run both in parallel
+npm run dev
+
+# Run all tests
+npm run test
+
+# Build frontend
+npm run build:frontend
+
+# Deploy (requires configuration)
+npm run deploy
+```
+
+---
+
+## 🧠 AI Agents & Skills
+
+This project uses specialized AI agents for different tasks:
+
+### Available Agents
+
+1. **nextjs-frontend-developer** - Frontend implementation
+   - React components
+   - Next.js pages
+   - API routes (BFF pattern)
+   - Tailwind CSS styling
+   - SWR data fetching
+
+2. **fastapi-backend-developer** - Backend API development
+   - REST endpoints
+   - Pydantic validation
+   - SQLModel integration
+   - Error handling
+
+3. **database-architect** - Database design
+   - Schema design
+   - Migrations (Alembic)
+   - Indexes & constraints
+   - Query optimization
+
+4. **auth-security-guardian** - Security & authentication
+   - JWT authentication
+   - CORS configuration
+   - Input sanitization
+   - Security headers
+
+5. **integration-testing-agent** - E2E & integration testing
+   - Playwright E2E tests
+   - API integration tests
+   - Database testing
+
+### Skills Reference
+
+All Phase II implementation skills are documented in:
+```
+.claude/skills/skills.md
+```
+
+**Available Skills**:
+1. Next.js Component Skill
+2. API Route Skill
+3. FastAPI Endpoint Skill
+4. Database Schema Skill
+5. Frontend Data Fetching Skill
+6. Form Handling Skill
+7. Environment Configuration Skill
+8. Integration Testing Skill
+9. Monorepo Setup Skill
+10. API Testing Skill
+11. Deployment Skill
+
+---
+
+## 📋 Constitution & Standards
+
+### Core Principles
+
+This project follows **Spec-Driven Development (SDD)** as defined in:
+```
+.specify/memory/constitution.md
+```
+
+**Key Principles**:
+1. ✅ **Spec-Driven Development** - All code from specs
+2. ✅ **Clean Code** - PEP 8, TypeScript strict mode
+3. ✅ **Test-First Development (TDD)** - Red-Green-Refactor
+4. ✅ **Single Responsibility** - Clear separation of concerns
+5. ✅ **Evolutionary Architecture** - Forward compatible
+6. ✅ **User Experience First** - Accessible, responsive
+
+### Quality Gates
+
+Before any merge:
+- ✅ All tests passing (unit + integration + E2E)
+- ✅ Type checking passes (mypy for Python, tsc for TypeScript)
+- ✅ Linting passes (flake8, ESLint)
+- ✅ Code coverage > 80%
+- ✅ Spec requirements met
+- ✅ No secrets in code
+
+---
+
+## 🚀 Deployment
+
+### Frontend (Vercel)
+
+```bash
+cd apps/frontend
+
+# Deploy to production
+vercel --prod
+
+# Environment variables in Vercel dashboard:
+# NEXT_PUBLIC_API_URL=https://your-backend.railway.app
+```
+
+### Backend (Railway)
+
+```bash
+cd apps/backend
+
+# Deploy to production
+railway up
+
+# Run migrations in production
+railway run poetry run alembic upgrade head
+
+# Environment variables in Railway dashboard:
+# DATABASE_URL=<neon-connection-string>
+# API_SECRET_KEY=<32-char-secret>
+# CORS_ORIGINS=["https://your-app.vercel.app"]
+```
+
+### Database (Neon)
+
+1. Create project at https://neon.tech
+2. Copy connection string
+3. Add to Railway environment variables
+4. Run migrations
+
+See `specs/phase-2-todo-web/README.md` for detailed deployment guide.
+
+---
+
+## 🧪 Testing Strategy
+
+### Frontend Testing
+
+- **Unit Tests**: Jest + React Testing Library
+- **E2E Tests**: Playwright
+- **Coverage Target**: > 80%
+
+```bash
+cd apps/frontend
+npm run test          # Unit tests
+npm run test:e2e      # E2E tests
+```
+
+### Backend Testing
+
+- **Unit Tests**: Pytest (models, services)
+- **Integration Tests**: Pytest with httpx (API endpoints)
+- **Coverage Target**: > 80%
+
+```bash
+cd apps/backend
+poetry run pytest --cov=app
+```
+
+### Integration Testing
+
+Full-stack integration tests verify:
+- API endpoints work end-to-end
+- Database operations succeed
+- Frontend-backend integration
+- Authentication flows
+
+```bash
+# Run from root
+npm run test:integration
+```
+
+---
+
+## 📚 Additional Resources
+
+### Documentation Files
+
+- **This File**: Overall project guide
+- **Frontend Guide**: `apps/frontend/CLAUDE.md`
+- **Backend Guide**: `apps/backend/CLAUDE.md`
+- **Spec Structure**: `specs/phase-2-todo-web/README.md`
+- **Constitution**: `.specify/memory/constitution.md`
+- **Skills Reference**: `.claude/skills/skills.md`
+
+### SpecKit Plus Commands
+
+All available commands:
+- `/sp.specify` - Create feature specification
+- `/sp.plan` - Generate architecture plan
+- `/sp.tasks` - Break down into tasks
+- `/sp.implement` - Execute implementation
+- `/sp.adr <title>` - Document architectural decision
+- `/sp.checklist` - Generate feature checklist
+- `/sp.git.commit_pr` - Create commit and PR
+
+### External Links
+
+- **Next.js Docs**: https://nextjs.org/docs
+- **FastAPI Docs**: https://fastapi.tiangolo.com
+- **SQLModel Docs**: https://sqlmodel.tiangolo.com
+- **Neon Docs**: https://neon.tech/docs
+- **Vercel Docs**: https://vercel.com/docs
+- **Railway Docs**: https://docs.railway.app
+
+---
+
+## 🎯 Current Status
+
+**Phase**: II - Full-Stack Web Application
+**Stage**: Specification & Planning
+**Next Steps**:
+1. Run `/sp.specify` in `specs/phase-2-todo-web/`
+2. Generate architecture plan with `/sp.plan`
+3. Break down tasks with `/sp.tasks`
+4. Begin implementation
+
+---
+
+## 💡 Pro Tips
+
+### For Frontend Development
+- Use Server Components by default, Client Components only when needed
+- Reference `apps/frontend/CLAUDE.md` for component patterns
+- Check `.claude/skills/skills.md` for Next.js Component Skill
+
+### For Backend Development
+- All API endpoints should have OpenAPI docs
+- Reference `apps/backend/CLAUDE.md` for API patterns
+- Check `.claude/skills/skills.md` for FastAPI Endpoint Skill
+
+### For Database Work
+- Always create migrations, never modify schema directly
+- Reference `.claude/skills/skills.md` for Database Schema Skill
+- Test migrations both up and down
+
+### For Testing
+- Write tests for specs, not implementation
+- Use Given-When-Then format
+- Reference `.claude/skills/skills.md` for Testing Skills
+
+---
+
+**Built with Spec-Driven Development**
+**Powered by Claude Code + SpecKit Plus**
+
+For questions or issues, reference:
+- Constitution: `.specify/memory/constitution.md`
+- Agents: `.claude/agents/`
+- Skills: `.claude/skills/skills.md`
+- Specs: `specs/phase-2-todo-web/`
