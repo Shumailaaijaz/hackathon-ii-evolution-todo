@@ -162,10 +162,19 @@ async def health_check() -> dict:
     }
 
 
-# TODO: Register API routers here
-# Example:
-# from app.api.tasks import router as tasks_router
-# app.include_router(tasks_router, prefix="/api", tags=["Tasks"])
+# Register API routers
+from app.api.tasks import router as tasks_router
+
+app.include_router(
+    tasks_router,
+    prefix="/api",
+    tags=["Tasks"],
+    responses={
+        401: {"description": "Unauthorized - Missing or invalid JWT token"},
+        403: {"description": "Forbidden - Access denied to this resource"},
+        404: {"description": "Not Found - Resource does not exist"},
+    }
+)
 
 
 # Global exception handler for unhandled errors
