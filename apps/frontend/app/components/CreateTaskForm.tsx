@@ -29,8 +29,7 @@ const taskSchema = z.object({
   description: z
     .string()
     .max(1000, "Description must be less than 1000 characters")
-    .optional()
-    .transform((val) => val?.trim() || undefined),
+    .optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -65,7 +64,12 @@ export function CreateTaskForm({ onSuccess }: CreateTaskFormProps) {
 
     setIsSubmitting(true);
     try {
-      await createTask(user.id, data);
+      // Clean up data before sending
+      const taskData = {
+        title: data.title.trim(),
+        description: data.description?.trim() || undefined,
+      };
+      await createTask(user.id, taskData);
       reset();
       setIsOpen(false);
       onSuccess?.();

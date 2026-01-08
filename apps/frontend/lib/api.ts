@@ -25,13 +25,20 @@ async function fetchWithAuth<T>(
 ): Promise<ApiResponse<T>> {
   const token = await getAuthToken();
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
   };
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  // Merge with any additional headers from options
+  if (options.headers) {
+    const optionsHeaders = new Headers(options.headers);
+    optionsHeaders.forEach((value, key) => {
+      headers[key] = value;
+    });
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {

@@ -15,7 +15,7 @@ import {
   signOut as authSignOut,
   signUp as authSignUp,
 } from "../auth-client";
-import type { User, AuthState } from "../types";
+import type { User, AuthState, Session } from "../types";
 
 /**
  * Authentication hook.
@@ -44,14 +44,27 @@ export function useAuth(): AuthState & {
     try {
       const authenticated = await isAuthenticated();
       const user = authenticated ? await getCurrentUser() : null;
-      const session = authenticated
-        ? await authClient.getSession()
+      const sessionData = authenticated ? await authClient.getSession() : null;
+
+      // Extract session info and create our Session type
+      const session: Session | null = sessionData?.data?.user
+        ? {
+            user: {
+              id: sessionData.data.user.id,
+              email: sessionData.data.user.email,
+              name: sessionData.data.user.name,
+              createdAt: new Date(sessionData.data.user.createdAt).toISOString(),
+              updatedAt: new Date(sessionData.data.user.updatedAt).toISOString(),
+            },
+            token: (sessionData.data.session as any)?.token || "",
+            expiresAt: (sessionData.data.session as any)?.expiresAt || "",
+          }
         : null;
 
       setAuthState({
         isAuthenticated: authenticated,
         user: user as User | null,
-        session: session?.data ?? null,
+        session,
         isLoading: false,
       });
     } catch (error) {
