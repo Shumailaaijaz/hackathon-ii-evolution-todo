@@ -1,12 +1,18 @@
 /**
- * TaskCard component.
+ * TaskCard component with smooth animations.
  *
- * Displays an individual task with completion toggle and action menu.
+ * Features:
+ * - Smooth entry/exit animations
+ * - Hover effects with scale transforms
+ * - Completion animation with transitions
+ * - Loading states with spinners
+ * - Animated dropdown menu
+ * - Status badge transitions
  */
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle,
   Circle,
@@ -14,6 +20,7 @@ import {
   Edit2,
   MoreVertical,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { toggleTask, deleteTask } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/utils/date";
@@ -24,11 +31,29 @@ interface TaskCardProps {
   task: Task;
   onUpdate?: () => void;
   onDelete?: () => void;
+  index?: number; // For staggered animations
 }
 
-export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onUpdate, onDelete, index = 0 }: TaskCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Trigger entry animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), index * 50);
+    return () => clearTimeout(timer);
+  }, [index]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setShowMenu(false);
+    if (showMenu) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [showMenu]);
 
   // Toggle completion status
   const handleToggleComplete = async () => {
@@ -53,18 +78,24 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this task?")) return;
 
+    setIsDeleting(true);
     setIsLoading(true);
-    try {
-      await deleteTask(task.userId, task.id);
-      onDelete?.();
-      toast.success("Task deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete task:", error);
-      toast.error("Failed to delete task. Please try again.");
-    } finally {
-      setIsLoading(false);
-      setShowMenu(false);
-    }
+
+    // Wait for exit animation
+    setTimeout(async () => {
+      try {
+        await deleteTask(task.userId, task.id);
+        onDelete?.();
+        toast.success("Task deleted successfully");
+      } catch (error) {
+        console.error("Failed to delete task:", error);
+        toast.error("Failed to delete task. Please try again.");
+        setIsDeleting(false);
+      } finally {
+        setIsLoading(false);
+        setShowMenu(false);
+      }
+    }, 300);
   };
 
   // Open edit modal (to be implemented)
@@ -75,100 +106,179 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div
+      className={`
+        bg-white border border-gray-200 rounded-lg p-4
+        transition-all duration-300 ease-out
+        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+        ${isDeleting ? "opacity-0 scale-95 -translate-x-full" : ""}
+        ${task.completed ? "bg-gray-50/50" : ""}
+        hover:shadow-lg hover:scale-[1.02] hover:border-blue-300
+        group
+      `}
+      style={{
+        transitionDelay: isVisible ? `${index * 50}ms` : "0ms",
+      }}
+    >
       <div className="flex items-start gap-3">
-        {/* Completion Checkbox */}
+        {/* Completion Checkbox with Animation */}
         <button
           onClick={handleToggleComplete}
           disabled={isLoading}
-          className="mt-0.5 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
-          aria-label={
-            task.completed ? "Mark as incomplete" : "Mark as complete"
-          }
+          className={`
+            mt-0.5 transition-all duration-200
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${isLoading ? "animate-pulse" : ""}
+            ${task.completed ? "text-green-600" : "text-gray-400"}
+            hover:text-blue-600 hover:scale-110
+            active:scale-95
+          `}
+          aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
         >
-          {task.completed ? (
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+          ) : task.completed ? (
             <CheckCircle
-              className="w-5 h-5 text-green-600"
+              className="w-5 h-5 transition-transform duration-200 animate-[bounce_0.5s_ease-in-out]"
               aria-hidden="true"
             />
           ) : (
-            <Circle className="w-5 h-5" aria-hidden="true" />
+            <Circle
+              className="w-5 h-5 transition-transform duration-200"
+              aria-hidden="true"
+            />
           )}
         </button>
 
-        {/* Task Content */}
+        {/* Task Content with Smooth Transitions */}
         <div className="flex-1 min-w-0">
-          {/* Title */}
+          {/* Title with Completion Animation */}
           <h3
-            className={`text-lg font-medium ${
-              task.completed ? "line-through text-gray-500" : "text-gray-900"
-            }`}
+            className={`
+              text-lg font-medium transition-all duration-300
+              ${task.completed
+                ? "line-through text-gray-500 opacity-75"
+                : "text-gray-900 group-hover:text-blue-600"
+              }
+            `}
           >
             {task.title}
           </h3>
 
-          {/* Description */}
+          {/* Description with Fade */}
           {task.description && (
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            <p className={`
+              text-sm mt-1 line-clamp-2 transition-colors duration-200
+              ${task.completed ? "text-gray-400" : "text-gray-600"}
+            `}>
               {task.description}
             </p>
           )}
 
-          {/* Metadata */}
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-            {/* Status Badge */}
+          {/* Metadata with Animated Badges */}
+          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+            {/* Animated Status Badge */}
             <span
-              className={`px-2 py-1 rounded-full font-medium ${
-                task.completed
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+              className={`
+                px-3 py-1 rounded-full font-medium
+                transition-all duration-300 ease-out
+                transform hover:scale-105
+                ${task.completed
+                  ? "bg-green-100 text-green-800 shadow-sm"
+                  : "bg-blue-50 text-blue-700 border border-blue-200"
+                }
+              `}
             >
-              {task.completed ? "Completed" : "Pending"}
+              {task.completed ? "✓ Completed" : "○ Pending"}
             </span>
 
-            {/* Created Time */}
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" aria-hidden="true" />
-              {formatRelativeTime(task.createdAt)}
+            {/* Created Time with Icon Animation */}
+            <span className="flex items-center gap-1 group/time">
+              <Clock
+                className="w-3 h-3 transition-transform duration-200 group-hover/time:rotate-12"
+                aria-hidden="true"
+              />
+              <span className="transition-colors duration-200 group-hover/time:text-gray-700">
+                {formatRelativeTime(task.createdAt)}
+              </span>
             </span>
           </div>
         </div>
 
-        {/* Action Menu */}
-        <div className="relative">
+        {/* Animated Action Menu */}
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 transition-colors"
+            className={`
+              p-2 rounded-lg transition-all duration-200
+              ${showMenu
+                ? "text-blue-600 bg-blue-50 scale-110"
+                : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              }
+              hover:scale-110 active:scale-95
+              group-hover:opacity-100 opacity-0
+            `}
             aria-label="Task actions"
             aria-expanded={showMenu}
             aria-haspopup="true"
           >
-            <MoreVertical className="w-5 h-5" aria-hidden="true" />
+            <MoreVertical
+              className={`w-5 h-5 transition-transform duration-200 ${
+                showMenu ? "rotate-90" : ""
+              }`}
+              aria-hidden="true"
+            />
           </button>
 
-          {/* Dropdown Menu */}
+          {/* Animated Dropdown Menu */}
           {showMenu && (
             <div
-              className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+              className={`
+                absolute right-0 mt-2 w-48
+                bg-white border border-gray-200 rounded-lg shadow-xl z-20
+                animate-[slideIn_0.2s_ease-out]
+                overflow-hidden
+              `}
               role="menu"
             >
               <button
                 onClick={handleEdit}
-                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-t-lg"
+                className="
+                  w-full flex items-center gap-3 px-4 py-3 text-sm
+                  text-gray-700 hover:bg-blue-50 hover:text-blue-700
+                  transition-all duration-150
+                  group/edit
+                "
                 role="menuitem"
               >
-                <Edit2 className="w-4 h-4" aria-hidden="true" />
-                Edit Task
+                <Edit2
+                  className="w-4 h-4 transition-transform duration-200 group-hover/edit:scale-110"
+                  aria-hidden="true"
+                />
+                <span>Edit Task</span>
               </button>
+              <div className="border-t border-gray-100" />
               <button
                 onClick={handleDelete}
                 disabled={isLoading}
-                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg disabled:opacity-50"
+                className="
+                  w-full flex items-center gap-3 px-4 py-3 text-sm
+                  text-red-600 hover:bg-red-50
+                  transition-all duration-150
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  group/delete
+                "
                 role="menuitem"
               >
-                <Trash2 className="w-4 h-4" aria-hidden="true" />
-                Delete Task
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Trash2
+                    className="w-4 h-4 transition-transform duration-200 group-hover/delete:scale-110 group-hover/delete:rotate-12"
+                    aria-hidden="true"
+                  />
+                )}
+                <span>Delete Task</span>
               </button>
             </div>
           )}

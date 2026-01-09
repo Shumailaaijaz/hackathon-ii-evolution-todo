@@ -80,7 +80,7 @@ class Task(SQLModel, table=True):
         foreign_key="users.id",
         index=True,
         description="Task owner (references users.id, indexed for performance)",
-        sa_column_kwargs={"nullable": False"}
+        sa_column_kwargs={"nullable": False}
     )
 
     # Task content
@@ -88,14 +88,14 @@ class Task(SQLModel, table=True):
         min_length=1,
         max_length=200,
         description="Task title (1-200 characters, required, non-empty after trim)",
-        sa_column_kwargs={"nullable": False"}
+        sa_column_kwargs={"nullable": False}
     )
 
     description: Optional[str] = Field(
         default=None,
         max_length=2000,
         description="Optional task description (max 2000 characters, supports Markdown)",
-        sa_column_kwargs={"nullable": True"}
+        sa_column_kwargs={"nullable": True}
     )
 
     # Status enum
