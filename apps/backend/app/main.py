@@ -120,6 +120,10 @@ async def root() -> dict:
         "openapi": "/openapi.json",
         "environment": settings.ENVIRONMENT,
         "endpoints": {
+            "auth": {
+                "signup": "/api/auth/signup",
+                "signin": "/api/auth/signin"
+            },
             "tasks": "/api/{user_id}/tasks",
             "health": "/health",
         }
@@ -163,8 +167,22 @@ async def health_check() -> dict:
 
 
 # Register API routers
+from app.api.auth import router as auth_router
 from app.api.tasks import router as tasks_router
 
+# Authentication routes
+app.include_router(
+    auth_router,
+    prefix="/api",
+    tags=["Authentication"],
+    responses={
+        400: {"description": "Bad Request - Invalid input"},
+        401: {"description": "Unauthorized - Invalid credentials"},
+        409: {"description": "Conflict - Resource already exists"},
+    }
+)
+
+# Task routes (protected)
 app.include_router(
     tasks_router,
     prefix="/api",

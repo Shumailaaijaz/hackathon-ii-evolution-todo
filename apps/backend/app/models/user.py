@@ -10,6 +10,8 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
 
+from sqlalchemy import text
+from sqlalchemy.sql import func
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
@@ -48,7 +50,7 @@ class User(SQLModel, table=True):
         default_factory=uuid4,
         primary_key=True,
         description="Unique user identifier (UUID v4)",
-        sa_column_kwargs={"server_default": "gen_random_uuid()"}
+        sa_column_kwargs={"server_default": text("gen_random_uuid()")}
     )
 
     # Authentication - Email
@@ -76,7 +78,7 @@ class User(SQLModel, table=True):
         description="Account creation timestamp (UTC, immutable after insert)",
         sa_column_kwargs={
             "nullable": False,
-            "server_default": "NOW()"
+            "server_default": func.now()
         }
     )
 
@@ -85,7 +87,7 @@ class User(SQLModel, table=True):
         description="Last modification timestamp (UTC, auto-updated by DB trigger)",
         sa_column_kwargs={
             "nullable": False,
-            "server_default": "NOW()"
+            "server_default": func.now()
         }
     )
 
@@ -95,7 +97,7 @@ class User(SQLModel, table=True):
         description="Account active status (True=active, False=soft deleted)",
         sa_column_kwargs={
             "nullable": False,
-            "server_default": "TRUE"
+            "server_default": text("true")
         }
     )
 
@@ -108,7 +110,6 @@ class User(SQLModel, table=True):
     # Relationships
     tasks: list["Task"] = Relationship(
         back_populates="user",
-        cascade_delete=True,  # Delete all tasks when user is deleted
         sa_relationship_kwargs={
             "lazy": "selectin",
             "cascade": "all, delete-orphan"

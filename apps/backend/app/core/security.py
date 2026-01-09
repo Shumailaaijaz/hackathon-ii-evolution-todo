@@ -1,16 +1,76 @@
-"""Security utilities for JWT token validation.
+"""Security utilities for authentication and authorization.
 
-This module provides functions for verifying JWT tokens issued by Better Auth.
-All protected API endpoints use these utilities to authenticate requests.
+This module provides:
+- Password hashing and verification with bcrypt
+- JWT token generation and validation
+- Better Auth token validation
+
+Security follows OWASP best practices:
+- Bcrypt for password hashing (with salt rounds)
+- JWT with configurable expiration
+- Secure secret key validation
 """
 
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt
 import jwt
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+
+
+# ============================================================================
+# Password Hashing with Bcrypt
+# ============================================================================
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt.
+
+    Args:
+        password: Plain text password to hash
+
+    Returns:
+        Hashed password string (bcrypt format with salt)
+
+    Example:
+        >>> hashed = hash_password("mysecretpassword")
+        >>> len(hashed)
+        60  # Bcrypt always produces 60-char hash
+    """
+    # Generate salt and hash password
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a bcrypt hash.
+
+    Args:
+        plain_password: Plain text password to verify
+        hashed_password: Bcrypt hash to compare against
+
+    Returns:
+        True if password matches, False otherwise
+
+    Example:
+        >>> hashed = hash_password("mypassword")
+        >>> verify_password("mypassword", hashed)
+        True
+        >>> verify_password("wrongpassword", hashed)
+        False
+    """
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'),
+        hashed_password.encode('utf-8')
+    )
+
+
+# ============================================================================
+# JWT Token Generation and Validation
+# ============================================================================
 
 
 def verify_jwt_token(token: str) -> Optional[dict]:

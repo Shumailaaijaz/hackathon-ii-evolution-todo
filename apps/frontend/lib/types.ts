@@ -17,16 +17,21 @@ export interface User {
 }
 
 /**
+ * Task status enumeration matching backend.
+ */
+export type TaskStatus = "pending" | "in_progress" | "completed";
+
+/**
  * Task entity representing a todo item.
  */
 export interface Task {
-  id: number;
-  userId: string;
+  id: string;  // UUID
+  userId: string;  // user_id from backend
   title: string;
   description: string | null;
-  completed: boolean;
-  createdAt: string;
-  updatedAt: string;
+  status: TaskStatus;  // Changed from completed: boolean
+  createdAt: string;  // created_at from backend
+  updatedAt: string;  // updated_at from backend
 }
 
 /**
@@ -59,14 +64,14 @@ export interface TaskCreateRequest {
 export interface TaskUpdateRequest {
   title?: string;
   description?: string;
-  completed?: boolean;
+  status?: TaskStatus;  // Changed from completed
 }
 
 /**
  * Query parameters for listing tasks.
  */
 export interface TaskListParams {
-  completed?: boolean;
+  status?: TaskStatus;  // Changed from completed
   sort?: "created_at" | "updated_at" | "title";
   order?: "asc" | "desc";
 }

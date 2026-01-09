@@ -11,6 +11,13 @@ from uuid import UUID
 from pydantic import BaseModel, Field, field_validator
 
 
+class TaskStatus(str):
+    """Task status values matching database VARCHAR enum."""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+
+
 class TaskCreate(BaseModel):
     """Schema for creating a new task.
 
@@ -79,7 +86,7 @@ class TaskUpdate(BaseModel):
     Attributes:
         title: Optional new title (1-200 characters)
         description: Optional new description (max 1000 characters, use "" to clear)
-        completed: Optional completion status
+        status: Optional task status (pending | in_progress | completed)
     """
 
     title: Optional[str] = Field(
@@ -97,10 +104,10 @@ class TaskUpdate(BaseModel):
         examples=["Updated description", ""]
     )
 
-    completed: Optional[bool] = Field(
+    status: Optional[str] = Field(
         None,
-        description="Task completion status (optional)",
-        examples=[True, False]
+        description="Task status (optional): pending, in_progress, or completed",
+        examples=["pending", "in_progress", "completed"]
     )
 
     @field_validator("title")
@@ -124,8 +131,8 @@ class TaskUpdate(BaseModel):
             "examples": [
                 {"title": "Updated title"},
                 {"description": "New description"},
-                {"completed": True},
-                {"title": "New title", "completed": True}
+                {"status": "completed"},
+                {"title": "New title", "status": "in_progress"}
             ]
         }
     }
@@ -137,16 +144,20 @@ class TaskResponse(BaseModel):
     This is the standard format for returning task data from the API.
 
     Attributes:
-        id: Task identifier
+        id: Task identifier (UUID)
         user_id: Owner's user ID
         title: Task title
         description: Task description (optional)
-        completed: Completion status
+        status: Task status (pending | in_progress | completed)
         created_at: Creation timestamp (UTC)
         updated_at: Last update timestamp (UTC)
     """
 
-    id: int = Field(..., description="Task identifier", examples=[1, 42, 100])
+    id: UUID = Field(
+        ...,
+        description="Task identifier (UUID)",
+        examples=["a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"]
+    )
 
     user_id: UUID = Field(
         ...,
@@ -166,10 +177,10 @@ class TaskResponse(BaseModel):
         examples=["Milk, eggs, bread"]
     )
 
-    completed: bool = Field(
+    status: str = Field(
         ...,
-        description="Completion status",
-        examples=[False, True]
+        description="Task status: pending, in_progress, or completed",
+        examples=["pending", "in_progress", "completed"]
     )
 
     created_at: datetime = Field(
@@ -189,11 +200,11 @@ class TaskResponse(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "id": 1,
+                    "id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
                     "user_id": "550e8400-e29b-41d4-a716-446655440000",
                     "title": "Buy groceries",
                     "description": "Milk, eggs, bread",
-                    "completed": False,
+                    "status": "pending",
                     "created_at": "2024-01-15T10:30:00Z",
                     "updated_at": "2024-01-15T10:30:00Z"
                 }

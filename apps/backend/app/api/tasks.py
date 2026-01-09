@@ -5,6 +5,7 @@ All endpoints require JWT authentication and enforce user isolation.
 """
 
 from typing import Annotated, Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session, select
@@ -28,13 +29,13 @@ async def get_tasks(
     user_id: str,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
-    completed: Optional[bool] = Query(None, description="Filter by completion status"),
+    status: Optional[str] = Query(None, description="Filter by status (pending, in_progress, completed)"),
     sort: Optional[str] = Query("created_at", description="Sort field (created_at, updated_at, title)"),
     order: Optional[str] = Query("desc", description="Sort order (asc, desc)"),
 ) -> ApiResponse[list[TaskResponse]]:
     """Get all tasks for the authenticated user.
 
-    This endpoint retrieves tasks with optional filtering by completion status
+    This endpoint retrieves tasks with optional filtering by status
     and sorting by various fields. User isolation is enforced - users can only
     access their own tasks.
 
@@ -42,7 +43,7 @@ async def get_tasks(
         user_id: User ID from URL path
         current_user: Authenticated user ID from JWT (injected)
         session: Database session (injected)
-        completed: Optional filter by completion status
+        status: Optional filter by status (pending, in_progress, completed)
         sort: Sort field (created_at, updated_at, title)
         order: Sort order (asc, desc)
 
@@ -58,9 +59,9 @@ async def get_tasks(
     # Build query
     query = select(Task).where(Task.user_id == user_id)
 
-    # Apply completion filter if specified
-    if completed is not None:
-        query = query.where(Task.completed == completed)
+    # Apply status filter if specified
+    if status is not None:
+        query = query.where(Task.status == status)
 
     # Apply sorting
     sort_field = Task.created_at  # Default
@@ -117,12 +118,11 @@ async def create_task(
     # Verify user access
     verify_user_access(current_user, user_id)
 
-    # Create task instance
+    # Create task instance - status defaults to 'pending' in the model
     task = Task(
         user_id=user_id,
         title=task_data.title,
-        description=task_data.description,
-        completed=False  # New tasks always start as incomplete
+        description=task_data.description
     )
 
     # Save to database
@@ -143,7 +143,7 @@ async def create_task(
 )
 async def get_task(
     user_id: str,
-    task_id: int,
+    task_id: UUID,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ) -> ApiResponse[TaskResponse]:
@@ -194,7 +194,7 @@ async def get_task(
 )
 async def update_task_full(
     user_id: str,
-    task_id: int,
+    task_id: UUID,
     task_data: TaskUpdate,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
@@ -241,8 +241,8 @@ async def update_task_full(
     if task_data.description is not None:
         task.description = task_data.description
 
-    if task_data.completed is not None:
-        task.completed = task_data.completed
+    if task_data.status is not None:
+        task.status = task_data.status
 
     # Save changes (updated_at auto-updated by trigger)
     session.add(task)
@@ -262,7 +262,7 @@ async def update_task_full(
 )
 async def update_task_partial(
     user_id: str,
-    task_id: int,
+    task_id: UUID,
     task_data: TaskUpdate,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
@@ -299,7 +299,7 @@ async def update_task_partial(
 )
 async def toggle_task_completion(
     user_id: str,
-    task_id: int,
+    task_id: UUID,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ) -> ApiResponse[TaskResponse]:
@@ -360,7 +360,7 @@ async def toggle_task_completion(
 )
 async def delete_task(
     user_id: str,
-    task_id: int,
+    task_id: UUID,
     current_user: CurrentUser,
     session: Annotated[Session, Depends(get_session)],
 ) -> ApiResponse[dict]:

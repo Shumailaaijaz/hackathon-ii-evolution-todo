@@ -2,6 +2,7 @@
  * API client for communicating with the FastAPI backend.
  *
  * All functions handle JWT token authentication automatically.
+ * Transforms backend snake_case fields to frontend camelCase.
  */
 
 import type {
@@ -15,6 +16,34 @@ import { getAuthToken } from "./auth-client";
 
 // Base API URL from environment variable
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+/**
+ * Backend task format (snake_case).
+ */
+interface BackendTask {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Transform backend task to frontend format.
+ */
+function transformTask(backendTask: BackendTask): Task {
+  return {
+    id: backendTask.id,
+    userId: backendTask.user_id,
+    title: backendTask.title,
+    description: backendTask.description,
+    status: backendTask.status as Task["status"],
+    createdAt: backendTask.created_at,
+    updatedAt: backendTask.updated_at,
+  };
+}
 
 /**
  * Make an authenticated API request.
@@ -83,8 +112,8 @@ export async function getTasks(
 ): Promise<ApiResponse<Task[]>> {
   const queryParams = new URLSearchParams();
 
-  if (params?.completed !== undefined) {
-    queryParams.set("completed", String(params.completed));
+  if (params?.status !== undefined) {
+    queryParams.set("status", params.status);
   }
   if (params?.sort) {
     queryParams.set("sort", params.sort);
@@ -96,21 +125,41 @@ export async function getTasks(
   const query = queryParams.toString();
   const endpoint = `/api/${userId}/tasks${query ? `?${query}` : ""}`;
 
-  return fetchWithAuth<Task[]>(endpoint);
+  const response = await fetchWithAuth<BackendTask[]>(endpoint);
+
+  // Transform backend tasks to frontend format
+  if (response.success && response.data) {
+    return {
+      ...response,
+      data: response.data.map(transformTask),
+    };
+  }
+
+  return response as ApiResponse<Task[]>;
 }
 
 /**
  * Get a single task by ID.
  *
  * @param userId - The user's ID
- * @param taskId - The task's ID
+ * @param taskId - The task's ID (UUID)
  * @returns Promise with ApiResponse containing the task
  */
 export async function getTask(
   userId: string,
-  taskId: number
+  taskId: string
 ): Promise<ApiResponse<Task>> {
-  return fetchWithAuth<Task>(`/api/${userId}/tasks/${taskId}`);
+  const response = await fetchWithAuth<BackendTask>(`/api/${userId}/tasks/${taskId}`);
+
+  // Transform backend task to frontend format
+  if (response.success && response.data) {
+    return {
+      ...response,
+      data: transformTask(response.data),
+    };
+  }
+
+  return response as ApiResponse<Task>;
 }
 
 /**
@@ -124,58 +173,88 @@ export async function createTask(
   userId: string,
   taskData: TaskCreateRequest
 ): Promise<ApiResponse<Task>> {
-  return fetchWithAuth<Task>(`/api/${userId}/tasks`, {
+  const response = await fetchWithAuth<BackendTask>(`/api/${userId}/tasks`, {
     method: "POST",
     body: JSON.stringify(taskData),
   });
+
+  // Transform backend task to frontend format
+  if (response.success && response.data) {
+    return {
+      ...response,
+      data: transformTask(response.data),
+    };
+  }
+
+  return response as ApiResponse<Task>;
 }
 
 /**
  * Update an existing task.
  *
  * @param userId - The user's ID
- * @param taskId - The task's ID
- * @param taskData - Updated task data (title, description, completed)
+ * @param taskId - The task's ID (UUID)
+ * @param taskData - Updated task data (title, description, status)
  * @returns Promise with ApiResponse containing the updated task
  */
 export async function updateTask(
   userId: string,
-  taskId: number,
+  taskId: string,
   taskData: TaskUpdateRequest
 ): Promise<ApiResponse<Task>> {
-  return fetchWithAuth<Task>(`/api/${userId}/tasks/${taskId}`, {
+  const response = await fetchWithAuth<BackendTask>(`/api/${userId}/tasks/${taskId}`, {
     method: "PUT",
     body: JSON.stringify(taskData),
   });
+
+  // Transform backend task to frontend format
+  if (response.success && response.data) {
+    return {
+      ...response,
+      data: transformTask(response.data),
+    };
+  }
+
+  return response as ApiResponse<Task>;
 }
 
 /**
  * Toggle task completion status.
  *
  * @param userId - The user's ID
- * @param taskId - The task's ID
+ * @param taskId - The task's ID (UUID)
  * @returns Promise with ApiResponse containing the updated task
  */
 export async function toggleTask(
   userId: string,
-  taskId: number
+  taskId: string
 ): Promise<ApiResponse<Task>> {
-  return fetchWithAuth<Task>(`/api/${userId}/tasks/${taskId}/toggle`, {
+  const response = await fetchWithAuth<BackendTask>(`/api/${userId}/tasks/${taskId}/toggle`, {
     method: "PATCH",
   });
+
+  // Transform backend task to frontend format
+  if (response.success && response.data) {
+    return {
+      ...response,
+      data: transformTask(response.data),
+    };
+  }
+
+  return response as ApiResponse<Task>;
 }
 
 /**
  * Delete a task permanently.
  *
  * @param userId - The user's ID
- * @param taskId - The task's ID
+ * @param taskId - The task's ID (UUID)
  * @returns Promise with ApiResponse containing success message
  */
 export async function deleteTask(
   userId: string,
-  taskId: number
-): Promise<ApiResponse<{ message: string; task_id: number }>> {
+  taskId: string
+): Promise<ApiResponse<{ message: string; task_id: string }>> {
   return fetchWithAuth(`/api/${userId}/tasks/${taskId}`, {
     method: "DELETE",
   });
