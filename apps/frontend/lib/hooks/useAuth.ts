@@ -8,12 +8,12 @@
 
 import { useEffect, useState } from "react";
 import {
-  authClient,
   getCurrentUser,
   isAuthenticated,
   signIn as authSignIn,
   signOut as authSignOut,
   signUp as authSignUp,
+  getAuthToken,
 } from "../auth-client";
 import type { User, AuthState, Session } from "../types";
 
@@ -24,7 +24,7 @@ import type { User, AuthState, Session } from "../types";
  */
 export function useAuth(): AuthState & {
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refetch: () => Promise<void>;
 } {
@@ -44,20 +44,14 @@ export function useAuth(): AuthState & {
     try {
       const authenticated = await isAuthenticated();
       const user = authenticated ? await getCurrentUser() : null;
-      const sessionData = authenticated ? await authClient.getSession() : null;
+      const token = authenticated ? await getAuthToken() : null;
 
-      // Extract session info and create our Session type
-      const session: Session | null = sessionData?.data?.user
+      // Create session from user data and token
+      const session: Session | null = user && token
         ? {
-            user: {
-              id: sessionData.data.user.id,
-              email: sessionData.data.user.email,
-              name: sessionData.data.user.name,
-              createdAt: new Date(sessionData.data.user.createdAt).toISOString(),
-              updatedAt: new Date(sessionData.data.user.updatedAt).toISOString(),
-            },
-            token: (sessionData.data.session as any)?.token || "",
-            expiresAt: (sessionData.data.session as any)?.expiresAt || "",
+            user: user, // User is already in the correct format from getCurrentUser
+            token: token,
+            expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
           }
         : null;
 
@@ -92,11 +86,11 @@ export function useAuth(): AuthState & {
   };
 
   /**
-   * Sign up with name, email, and password.
+   * Sign up with email and password.
    */
-  const signUp = async (name: string, email: string, password: string) => {
+  const signUp = async (email: string, password: string) => {
     try {
-      await authSignUp(name, email, password);
+      await authSignUp(email, password);
       await fetchAuthState();
     } catch (error) {
       console.error("Sign up failed:", error);

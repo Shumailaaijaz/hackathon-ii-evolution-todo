@@ -12,13 +12,15 @@ import { TaskList } from "../components/TaskList";
 import { CreateTaskForm } from "../components/CreateTaskForm";
 import { TaskFilters } from "../components/TaskFilters";
 
+import type { TaskStatus } from "@/lib/types";
+
 export default function TasksPage() {
   const [activeFilter, setActiveFilter] = useState<
-    "all" | "pending" | "completed"
+    "all" | "pending" | "in_progress" | "completed"
   >("all");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleFilterChange = (filter: "all" | "pending" | "completed") => {
+  const handleFilterChange = (filter: "all" | "pending" | "in_progress" | "completed") => {
     setActiveFilter(filter);
   };
 
@@ -27,13 +29,9 @@ export default function TasksPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
-  // Convert filter to completed param
-  const completedFilter =
-    activeFilter === "pending"
-      ? false
-      : activeFilter === "completed"
-      ? true
-      : undefined;
+  // Convert filter to status param
+  const statusFilter: TaskStatus | undefined =
+    activeFilter === "all" ? undefined : (activeFilter as TaskStatus);
 
   return (
     <>
@@ -42,8 +40,8 @@ export default function TasksPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Tasks</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Tasks</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Organize and track your work
           </p>
         </div>
@@ -59,7 +57,7 @@ export default function TasksPage() {
       {/* Task List */}
       <TaskList
         key={refreshKey}
-        completed={completedFilter}
+        status={statusFilter}
         sort="created_at"
         order="desc"
       />

@@ -41,7 +41,7 @@ interface CreateTaskFormProps {
 export function CreateTaskForm({ onSuccess }: CreateTaskFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   const {
     register,
@@ -57,6 +57,12 @@ export function CreateTaskForm({ onSuccess }: CreateTaskFormProps) {
   });
 
   const onSubmit = async (data: TaskFormData) => {
+    // Wait for auth to finish loading
+    if (isLoading) {
+      toast.error("Please wait while we verify your authentication...");
+      return;
+    }
+
     if (!user) {
       toast.error("You must be signed in to create tasks");
       return;
@@ -97,6 +103,7 @@ export function CreateTaskForm({ onSuccess }: CreateTaskFormProps) {
         variant="primary"
         size="md"
         icon={<Plus className="w-4 h-4" />}
+        disabled={isLoading || !user}
       >
         New Task
       </Button>
@@ -108,9 +115,9 @@ export function CreateTaskForm({ onSuccess }: CreateTaskFormProps) {
           <div>
             <label
               htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Title <span className="text-red-600">*</span>
+              Title <span className="text-red-600 dark:text-red-400">*</span>
             </label>
             <Input
               id="title"

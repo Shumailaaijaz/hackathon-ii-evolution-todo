@@ -13,13 +13,15 @@ import { Spinner } from "@/lib/components/ui/Spinner";
 import { EmptyState } from "@/lib/components/ui/EmptyState";
 import { AlertCircle } from "lucide-react";
 
+import type { TaskStatus } from "@/lib/types";
+
 interface TaskListProps {
-  completed?: boolean;
+  status?: TaskStatus;
   sort?: "created_at" | "updated_at" | "title";
   order?: "asc" | "desc";
 }
 
-export function TaskList({ completed, sort, order }: TaskListProps) {
+export function TaskList({ status, sort, order }: TaskListProps) {
   const { user, isLoading: authLoading } = useAuth();
   const {
     tasks,
@@ -28,7 +30,7 @@ export function TaskList({ completed, sort, order }: TaskListProps) {
     mutate,
   } = useTaskList({
     userId: user?.id || "",
-    completed,
+    status,
     sort,
     order,
   });
@@ -86,17 +88,23 @@ export function TaskList({ completed, sort, order }: TaskListProps) {
   // Empty State
   if (!tasks || tasks.length === 0) {
     const emptyMessage =
-      completed === true
+      status === "completed"
         ? {
             icon: "🎉",
             title: "No completed tasks",
             description: "Complete a task to see your progress here.",
           }
-        : completed === false
+        : status === "pending"
         ? {
             icon: "✅",
             title: "No pending tasks",
             description: "All caught up! Create a new task to get started.",
+          }
+        : status === "in_progress"
+        ? {
+            icon: "⏳",
+            title: "No tasks in progress",
+            description: "Start working on a task to see it here.",
           }
         : {
             icon: "📝",
