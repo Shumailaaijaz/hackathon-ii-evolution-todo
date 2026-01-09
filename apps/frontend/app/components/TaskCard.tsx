@@ -205,6 +205,28 @@ export function TaskCard({ task, onUpdate, onDelete, index = 0 }: TaskCardProps)
           </div>
         </div>
 
+        {/* Delete Button - More Prominent */}
+        <button
+          onClick={handleDelete}
+          disabled={isLoading}
+          className={`
+            p-2 rounded-lg transition-all duration-200
+            text-red-500 hover:text-red-700 hover:bg-red-50
+            group-hover:opacity-100 opacity-0
+            ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+          `}
+          aria-label="Delete task"
+        >
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+          ) : (
+            <Trash2
+              className="w-5 h-5 transition-transform duration-200 hover:scale-110 hover:rotate-12"
+              aria-hidden="true"
+            />
+          )}
+        </button>
+
         {/* Animated Action Menu */}
         <div className="relative" onClick={(e) => e.stopPropagation()}>
           <button
